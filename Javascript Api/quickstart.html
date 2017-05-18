@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Google Sheets API Quickstart</title>
+    <title>Google Apps Script Execution API Quickstart</title>
     <meta charset='utf-8' />
   </head>
   <body>
-    <p>Google Sheets API Quickstart</p>
+    <p>Google Apps Script Execution API Quickstart</p>
 
     <!--Add buttons to initiate auth sequence and sign out-->
     <button id="authorize-button" style="display: none;">Authorize</button>
@@ -15,14 +15,14 @@
 
     <script type="text/javascript">
       // Client ID and API key from the Developer Console
-      var CLIENT_ID = '958788215075-rcrfv7veg5b6t7vok6b582geudj8kvbo.apps.googleusercontent.com'  ;
+      var CLIENT_ID = '358507084490-d62ahqorp7fk7lc1b451ar4h7hgft6s1.apps.googleusercontent.com';
 
       // Array of API discovery doc URLs for APIs used by the quickstart
-      var DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
+      var DISCOVERY_DOCS = ["https://script.googleapis.com/$discovery/rest?version=v1"];
 
       // Authorization scopes required by the API; multiple scopes can be
       // included, separated by spaces.
-      var SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
+      var SCOPES = 'https://www.googleapis.com/auth/drive';
 
       var authorizeButton = document.getElementById('authorize-button');
       var signoutButton = document.getElementById('signout-button');
@@ -62,7 +62,7 @@
         if (isSignedIn) {
           authorizeButton.style.display = 'none';
           signoutButton.style.display = 'block';
-          listMajors();
+          callScriptFunction();
         } else {
           authorizeButton.style.display = 'block';
           signoutButton.style.display = 'none';
@@ -96,28 +96,59 @@
       }
 
       /**
-       * Print the names and majors of students in a sample spreadsheet:
-       * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+       * Load the API and make an API call.  Display the results on the screen.
        */
-      function listMajors() {
-        gapi.client.sheets.spreadsheets.values.get({
-          spreadsheetId: '1YU-opHLVwA-Z-EIuadjj6Kjk8FV-9ty47pMVyh4ZHSM',
-          range: 'A:D',
-        }).then(function(response) { var c=0;
-          var range = response.result;
-          if (range.values.length > 0) {
-            //appendPre('namea, phone, message');
-            for (i = 0; i < range.values.length; i++) {
-              var row = range.values[i]; c++;
-              // Searches for a particular record with phone number as '8880' and displays that row in the spreadhsheet. 
-              if(row[2]==='8880')
-                appendPre(row[0] + ' ' + row[1] + ' ' + row[2] + ' ' + row[3]);
+      function callScriptFunction() {
+        var scriptId = "19ZSjyOETwq9GflwZLk9FiQJGDAF-C-Dws0Rjqtw4jueKiB9M4o1XTK4j";
+
+        // Call the Execution API run method
+        //   'scriptId' is the URL parameter that states what script to run
+        //   'resource' describes the run request body (with the function name
+        //              to execute)
+        gapi.client.script.scripts.run({
+          'scriptId': scriptId,
+          'resource': {
+            'function': 'getEmail'
+          }
+        }).then(function(resp) {
+          var result = resp.result;
+          if (result.error && result.error.status) {
+            // The API encountered a problem before the script
+            // started executing.
+            appendPre('Error calling API:');
+            appendPre(JSON.stringify(result, null, 2));
+          } else if (result.error) {
+            // The API executed, but the script returned an error.
+
+            // Extract the first (and only) set of error details.
+            // The values of this object are the script's 'errorMessage' and
+            // 'errorType', and an array of stack trace elements.
+            var error = result.error.details[0];
+            appendPre('Script error message: ' + error.errorMessage);
+
+            if (error.scriptStackTraceElements) {
+              // There may not be a stacktrace if the script didn't start
+              // executing.
+              appendPre('Script error stacktrace:');
+              for (var i = 0; i < error.scriptStackTraceElements.length; i++) {
+                var trace = error.scriptStackTraceElements[i];
+                appendPre('\t' + trace.function + ':' + trace.lineNumber);
+              }
             }
           } else {
-            appendPre('No data found.');
+            // The structure of the result will depend upon what the Apps
+            // Script function returns. Here, the function returns an Apps
+            // Script Object with String keys and values, and so the result
+            // is treated as a JavaScript object (folderSet).
+
+            var folderSet = result.response.result;
+            console.log(folderSet);
+            if (Object.keys(folderSet).length == 0) {
+                appendPre('No folders returned!');
+            } else {
+              appendPre('Email: ' + folderSet);
+            }
           }
-        }, function(response) {
-          appendPre('Error: ' + response.result.error.message);
         });
       }
 
