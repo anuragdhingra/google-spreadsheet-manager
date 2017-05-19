@@ -13,7 +13,7 @@ $("#heyyou").submit(function(event){
 
     
     request = $.ajax({
-        url: "https://script.google.com/macros/s/AKfycbxLmJIdx8eD7URy1CsSgk0MZumUXG1yIJkhzj_r4p4tEuC-_L7B/exec",
+        url: "https://script.google.com/macros/s/AKfycbwI5Y0SzfdoWyTy-ud6KLSszV_4R3OxUJ8-kvXCCzleyZscKNgc/exec",
         type: "post",
         data: serializedData
     });
@@ -40,3 +40,5 @@ $("#heyyou").submit(function(event){
 
     event.preventDefault();
 });
+
+
