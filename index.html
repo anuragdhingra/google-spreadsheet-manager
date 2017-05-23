@@ -64,6 +64,7 @@
           signoutButton.style.display = 'block';
           listMajors();
           callScriptFunction();
+          updateData();
         } else {
           authorizeButton.style.display = 'block';
           signoutButton.style.display = 'none';
@@ -118,6 +119,17 @@
           }
         }, function(response) {
           appendPre('Error: ' + response.result.error.message);
+        });
+      }
+
+      function updateData() {
+        gapi.client.sheets.spreadsheets.values.update({
+            spreadsheetId: '1KQTxAujWW2RV-Kk7k7x-ERlrFooovVVv9tUAz_6xLxc',
+            range: 'test!B2',
+            valueInputOption: 'USER_ENTERED',
+            values: [ ["456"] ]
+        }).then(function(response) {
+            console.log(response);
         });
       }
 
