@@ -64,6 +64,7 @@
           signoutButton.style.display = 'block';
           listMajors();
           callScriptFunction();
+          appendNewData();
           updateData();
         } else {
           authorizeButton.style.display = 'block';
@@ -128,6 +129,18 @@
             range: 'test!B2',
             valueInputOption: 'USER_ENTERED',
             values: [ ["456"] ]
+        }).then(function(response) {
+            console.log(response);
+        });
+      }
+
+      function appendNewData() {
+        var requestJson ='{values : [["test4@test.com","444"]] }';
+        gapi.client.sheets.spreadsheets.values.append({
+            spreadsheetId: '1KQTxAujWW2RV-Kk7k7x-ERlrFooovVVv9tUAz_6xLxc',
+            range: 'A:B',
+            resource: requestJson,
+            valueInputOption: 'USER_ENTERED'
         }).then(function(response) {
             console.log(response);
         });
